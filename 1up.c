@@ -11,20 +11,20 @@ void * graphics_threadf()
 {
 	screen_init("GBA Screen");
 
- 	while(1)
- 	{
+ 	//while(1)
+ 	//{
  		screen_clear();
-
  		for (int x = 0; x < 240; x++)
  			for (int y = 0; y < 160; y++)
 			{
-				char * base_addr = (char *)((0x6000000 + x + (240 * y)) * 3);
+				char * base_addr = (char *)((0x6000000 + x + (240 * y)*3) );
+				printf("%x %x %x\n", *base_addr, *(base_addr+1), *(base_addr+2));
  				draw_pixel(x, y, *base_addr, *(base_addr + 1), *(base_addr + 2));
 			}
  		screen_flip();
- 	}
+// 	}
 	
-	screen_end();
+// 	screen_end();
 
 	return NULL;
 }

@@ -2,8 +2,8 @@
 #include <stdint.h>
 
 // change these to size of the screen:
-#define screen_x 300
-#define screen_y 200
+#define screen_x 240
+#define screen_y 160
 
 extern uint8_t * screen; // bgr
 

@@ -16,18 +16,18 @@ void screen_flip()
 
 void screen_init(const char * title)
 {
-	printf("init\n");
 	SDL_Init(SDL_INIT_VIDEO);
 	
-	printf("screen\n");
-	sdl_screen = SDL_SetVideoMode(screen_x, screen_y, 24, SDL_HWSURFACE | SDL_FULLSCREEN);
+	sdl_screen = SDL_SetVideoMode(screen_x, screen_y, 24, SDL_SWSURFACE);
 	SDL_WM_SetCaption(title, 0);
-	
-	printf("other\n");
+
+	if (sdl_screen == NULL)
+	{
+		printf("Could not connect to display!");
+		exit(0);
+	}
 	screen = (uint8_t *)sdl_screen->pixels;
-	printf("willclear\n");
 	screen_clear();
-	printf("idk\n");
 	screen_flip();
 }
 

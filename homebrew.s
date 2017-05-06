@@ -23,7 +23,7 @@ main:
 
 draw:
 	// set them all to red
-	strh	r1, [r0], #3
+	strh	r1, [r0], #2
 	subs	r2, r2, #1
 
 	// continue if countdown not done
