@@ -19,20 +19,24 @@ void * graphics_threadf()
 
 	// clear the display
  	screen_clear();
-
+while (1)
+{
 	// go through all pixels of the display
  	for (int y = 0; y < 160; y++)
  		for (int x = 0; x < 240; x++)
 		{
 			// grab the appropriate address of this pixel from GBA memory
-			char * base_addr = (char *)((0x6000000 + x*2 + (240 * y)*2) );
+			uint16_t * base_addr = (uint16_t *)((0x6000000 + x*2 + (240 * y)*2) );
+
+			// *base_addr = (*base_addr << 1 | *base_addr >> 15);
 
 			// draw this pixel using the two colors at the address
- 			draw_pixel(x, y, *base_addr, *(base_addr + 1));
+ 			draw_pixel(x, y, *base_addr);
 		}
 
 	// commit the buffers to display the drawn image
  	screen_flip();
+}
 
 // 	screen_end();
 
@@ -65,7 +69,7 @@ int deinit()
                         54, 0, 0, 0,            // number bytes in header
                         40, 0, 0, 0,            // BITMAPINFOHEADER = 40 bytes
                         240, 0, 0, 0,           // width in pixels
-                        160, 0, 0, 0,           // height in pixels
+                        0x100 - 160, 0xFF, 0xFF, 0xFF,           // height in pixels
                         1, 0,                   // number of color planes
                         16, 0,                  // bits per pixel
                         0, 0, 0, 0,             // no compression
@@ -75,7 +79,7 @@ int deinit()
                         0, 0, 0, 0,             // number of colors (0=all)
                         0, 0, 0, 0};            // important colors, (0=all)
 
-	// write tga header to disk
+	// write bitmap header to disk
 	write(fd, header, 54);
 
 	// write image data to disk from screen buffer

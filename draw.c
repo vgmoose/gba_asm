@@ -1,7 +1,7 @@
 #include "draw.h"
 #include <SDL/SDL.h>
 
-uint8_t * screen;
+uint16_t * screen;
 SDL_Surface *sdl_screen;
 
 void screen_clear()
@@ -19,7 +19,7 @@ char screen_init(const char * title)
 	// initialize SDL
 	SDL_Init(SDL_INIT_VIDEO);
 
-	// set the video mode to 16-bit 	
+	// set the video mode
 	sdl_screen = SDL_SetVideoMode(screen_x, screen_y, 15, SDL_SWSURFACE);
 
 	// set the title
@@ -33,7 +33,7 @@ char screen_init(const char * title)
 	}
 
 	// setup the screen to draw to later
-	screen = (uint8_t *)sdl_screen->pixels;
+	screen = (uint16_t *)sdl_screen->pixels;
 
 	// clear the whole screen
 	screen_clear();
@@ -51,9 +51,7 @@ void screen_end()
 	SDL_Quit();
 }
 
-void draw_pixel(int x, int y, char r, char g)
+void draw_pixel(int x, int y, uint16_t b)
 {
-	uint32_t v = (y * screen_x + x) * 2;
-	screen[v] = r;
-	screen[v+1] = g;
+	screen[ (y * screen_x + x) ] = b;
 }

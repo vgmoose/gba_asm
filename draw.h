@@ -5,7 +5,7 @@
 #define screen_x 240
 #define screen_y 160
 
-extern uint8_t * screen; // bgr
+extern uint16_t * screen; // bgr555
 
 char screen_init(const char * title);
 void screen_end();
@@ -15,4 +15,4 @@ void screen_flip();
 void * render_text(char * text, char r, char g, char b);
 void draw_text(int x, int y, void * render);
 
-void draw_pixel(int x, int y, char r, char g);
+void draw_pixel(int x, int y, uint16_t g);
