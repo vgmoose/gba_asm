@@ -53,5 +53,5 @@ void screen_end()
 
 void draw_pixel(int x, int y, uint16_t b)
 {
-	screen[ (y * screen_x + x) ] = (b << 10) | ((b << 6) >> 6) | (((b >> 10) ));
+	screen[ (y * screen_x + x) ] = ((b << 10) & 0b0111110000000000) | (b & 0b0000001111100000) | (((b >> 10) & 0b0000000000011111));
 }
