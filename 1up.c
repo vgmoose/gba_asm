@@ -19,8 +19,7 @@ void * graphics_threadf()
 
 	// clear the display
  	screen_clear();
-while (1)
-{
+	
 	// go through all pixels of the display
  	for (int y = 0; y < 160; y++)
  		for (int x = 0; x < 240; x++)
@@ -28,15 +27,12 @@ while (1)
 			// grab the appropriate address of this pixel from GBA memory
 			uint16_t * base_addr = (uint16_t *)((0x6000000 + x*2 + (240 * y)*2) );
 
-			// *base_addr = (*base_addr << 1 | *base_addr >> 15);
-
 			// draw this pixel using the two colors at the address
  			draw_pixel(x, y, *base_addr);
 		}
 
 	// commit the buffers to display the drawn image
  	screen_flip();
-}
 
 // 	screen_end();
 

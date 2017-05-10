@@ -11,8 +11,8 @@ build:	1up.c homebrew.s draw.c draw.h dummy.c
 
 ifneq (,$(findstring arm, $(ARCH)))
 		$(call cecho, "making ARM binary")
-		as homebrew.s -o homebrew.o -mthumb-interwork
-		gcc -o 1up -lpthread -std=gnu11 draw.c draw.h homebrew.o 1up.c  -lSDLmain -lSDL -mthumb-interwork
+		as -g homebrew.s -o homebrew.o -mthumb-interwork
+		gcc -g -o 1up -lpthread -std=gnu11 draw.c draw.h homebrew.o 1up.c  -lSDLmain -lSDL -mthumb-interwork
 		$(call cecho, "built 1up")
 	
 else

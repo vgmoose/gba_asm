@@ -6,7 +6,7 @@ SDL_Surface *sdl_screen;
 
 void screen_clear()
 {
-	SDL_FillRect(sdl_screen, NULL, 0xFFFFFF);
+	SDL_FillRect(sdl_screen, NULL, 0xFFFF);
 }
 
 void screen_flip()
@@ -53,5 +53,5 @@ void screen_end()
 
 void draw_pixel(int x, int y, uint16_t b)
 {
-	screen[ (y * screen_x + x) ] = b;
+	screen[ (y * screen_x + x) ] = (b << 10) | ((b << 6) >> 6) | (((b >> 10) ));
 }
