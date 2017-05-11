@@ -4,9 +4,13 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <math.h>
+#include <string.h>
 #include "draw.h"
 
+
 pthread_t graphics_thread;
+extern void* jump_table();
 
 void * graphics_threadf()
 {
@@ -47,6 +51,12 @@ int init()
 	// map virtual memory for screen buffer
 	mmap((void*)0x6000000, 0x9600*3, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_FIXED, -1, 0);
 
+	// map virtual memory for swi hooks
+	mmap((void*)0x80000, 0x100, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_FIXED, -1, 0);
+
+	// copy the bytes of the sqrt swi to the jump table 
+	memcpy((void*)0x80000, &jump_table, 0x100);
+
 	// create the SDL thread to display the image
 	// TODO: races the asm code
 	pthread_create(&graphics_thread, NULL, graphics_threadf, NULL);
@@ -85,4 +95,10 @@ int deinit()
 
 	// exit syscall to stop gracefully
 	while(1);
+}
+
+int gba_sqrt()
+{
+	printf("Testing\n");
+	// printf("sqr root: %d", sqrt(4));
 }

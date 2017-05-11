@@ -4,8 +4,7 @@
 
 main:
 	mov	r0, #4
-	mov	r14, pc
-mov	pc, #	0x80000
+	swi	0x80000
 	mov	r1, r0
 	ldr	r0, =format
 	bl	printf
