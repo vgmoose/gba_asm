@@ -10,7 +10,6 @@
 
 
 pthread_t graphics_thread;
-extern void* jump_table();
 
 void * graphics_threadf()
 {
@@ -54,9 +53,6 @@ int init()
 	// map virtual memory for swi hooks
 	mmap((void*)0x80000, 0x100, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_FIXED, -1, 0);
 
-	// copy the bytes of the sqrt swi to the jump table 
-	memcpy((void*)0x80000, &jump_table, 0x100);
-
 	// create the SDL thread to display the image
 	// TODO: races the asm code
 	pthread_create(&graphics_thread, NULL, graphics_threadf, NULL);
@@ -97,8 +93,12 @@ int deinit()
 	while(1);
 }
 
-int gba_sqrt()
+// this method will perform a fake software interrupt depending on
+// the value that is passed into it
+int fake_swi(int arg1, int arg2, int arg3, int swi)
 {
-	printf("Testing\n");
-	// printf("sqr root: %d", sqrt(4));
+	if (swi == 0x80000)
+		return sqrt(arg1);
+
+	return 0;
 }

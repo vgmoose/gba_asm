@@ -4,8 +4,10 @@
 
 main:
 	mov	r0, #4
-	mov	r14, pc
-mov	pc, #	0x80000
+	stmdb	sp!, { r3 }
+	mov	r3, #0x80000
+	bl	fake_swi
+	ldmia	sp!, { r3 }
 	mov	r1, r0
 	ldr	r0, =format
 	bl	printf
