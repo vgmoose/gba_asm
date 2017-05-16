@@ -7,20 +7,20 @@ define cecho
       @tput sgr0
 endef
 
-build:	1up.c homebrew.s draw.c draw.h dummy.c
+build:	
 
 ifneq (,$(findstring arm, $(ARCH)))
 		$(call cecho, "making ARM binary")
-		as -g homebrew.s -o homebrew.o -mthumb-interwork
-		gcc -g -o 1up -lpthread -std=gnu11 draw.c draw.h homebrew.o 1up.c  -lSDLmain -lSDL -mthumb-interwork -lm
-		$(call cecho, "built 1up")
+		# as -g homebrew.s -o homebrew.o -mthumb-interwork
+		gcc -g homebrew/* 1up/* -o 1up.out -lpthread -std=gnu11 -lSDLmain -lSDL -mthumb-interwork -lm
+		$(call cecho, "built 1up.out")
 	
 else
 		$(call cecho, "cross-compiling GBA rom")
-		arm-none-eabi-gcc -mthumb-interwork -specs=gba.specs dummy.c homebrew.s -o homebrew.o
-		arm-none-eabi-objcopy -O binary homebrew.o homebrew.gba
+		arm-none-eabi-gcc -mthumb-interwork -specs=gba.specs homebrew/* 0up/* -o homebrew.o
+		arm-none-eabi-objcopy -O binary *.o homebrew.gba
 		$(call cecho, "built homebrew.gba")
 endif
 
 clean:
-	rm *.o *.gba 1up 
+	rm *.o *.gba *.out
