@@ -6,10 +6,13 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <signal.h>
 #include "draw.h"
 
 
 pthread_t graphics_thread;
+void m0_draw();
+void m3_draw();
 
 void * graphics_threadf()
 {
@@ -23,26 +26,52 @@ void * graphics_threadf()
 	// clear the display
  	screen_clear();
 
+	// the main display loop, constantly polls for pixels in memory and updates them
+	// depending on the mode, will take an appropriate action
 	while(1)
-{	
-	// go through all pixels of the display
- 	for (int y = 0; y < 160; y++)
- 		for (int x = 0; x < 240; x++)
+	{	
+		// grab the video mode
+		char video_mode = *(char*)(0x4000000);
+
+		// perform the appropriate drawing method based on the video mode
+		switch (video_mode)
 		{
-			// grab the appropriate address of this pixel from GBA memory
-			uint16_t * base_addr = (uint16_t *)((0x6000000 + x*2 + (240 * y)*2) );
-
-			// draw this pixel using the two colors at the address
- 			draw_pixel(x, y, *base_addr);
+			case 0x00:
+				m0_draw();
+				break;
+			case 0x03:
+				m3_draw();
+				break;
+			default:
+				break;
 		}
-
-	// commit the buffers to display the drawn image
- 	screen_flip();
-}
+	}
 
 // 	screen_end();
 
 	return NULL;
+}
+
+void m0_draw()
+{
+
+}
+
+void m3_draw()
+{
+        // go through all pixels of the display
+        for (int y = 0; y < 160; y++)
+                for (int x = 0; x < 240; x++)
+                {
+                        // grab the appropriate address of this pixel from GBA memory
+                        uint16_t * base_addr = (uint16_t *)((0x6000000 + x*2 + (240 * y)*2) );
+
+                        // draw this pixel using the two colors at the address
+                        draw_pixel(x, y, *base_addr);
+                }
+
+        // commit the buffers to display the drawn image
+        screen_flip();
 }
 
 void vmap(int start, int end)
@@ -88,39 +117,22 @@ int init()
 	pthread_create(&graphics_thread, NULL, graphics_threadf, NULL);
 }
 
+// boolean to keep program running
+static volatile int keepRunning = 1;
+
+void intHandler(int dummy)
+{
+	// set keep running boolean to false when handler fired
+	keepRunning = 0;
+}
+
 int deinit()
 {
-	// create a screen.bmp file
-	int fd = fileno(fopen("screen.bmp", "wb"));
+	// attach the interrupt handler to the SIGINT (Ctrl-C)
+	signal(SIGINT, intHandler);
 
-	// header for 16-bit bmp file
-
-        char header [] = { 0x42, 0x4D,          // "BM"
-                        0x70, 0xB6, 0x0, 0x0,  // total size (header+data)
-                        0, 0, 0, 0,             // reserved data
-                        54, 0, 0, 0,            // number bytes in header
-                        40, 0, 0, 0,            // BITMAPINFOHEADER = 40 bytes
-                        240, 0, 0, 0,           // width in pixels
-                        0x100 - 160, 0xFF, 0xFF, 0xFF,           // height in pixels
-                        1, 0,                   // number of color planes
-                        16, 0,                  // bits per pixel
-                        0, 0, 0, 0,             // no compression
-                        0x00, 0xC2, 0x01, 0x00, // size of pixel data
-                        0x13, 0x0b, 0, 0,       // horizontal resolution
-                        0x13, 0x0b, 0, 0,       // vertical resolution
-                        0, 0, 0, 0,             // number of colors (0=all)
-                        0, 0, 0, 0};            // important colors, (0=all)
-
-	// write bitmap header to disk
-	write(fd, header, 54);
-
-	// write image data to disk from screen buffer
-	write(fd, (void *) 0x6000000, 0x9600*2);		
-
-	printf("Wrote screenshot to screen.bmp\n");
-
-	// exit syscall to stop gracefully
-	while(1);
+	// hang forever so that the SDL window stays up
+	while(keepRunning);
 }
 
 // this method will perform a fake software interrupt depending on

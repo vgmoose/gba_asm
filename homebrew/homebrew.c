@@ -182,7 +182,7 @@ int main()
         m3_line(15+11*ii, 88, 104-11*ii, 150, RGB15(0, jj, jj));
     }
 
-    while(1);
+    deinit();
 
     return 0;
 }
