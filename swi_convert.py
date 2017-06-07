@@ -1,31 +1,39 @@
 #!/bin/python
 # replaces any swi instructions with a jump to the 1up/dummy hooks
 
-# load file full into memory
-contents = open("homebrew.s", "r").readlines()
+import os, sys
 
-# the string we'll write out later
-out = ""
+# get the target filename
+try:
+	name = sys.argv[1]
+except:
+	print("Usage: python " + sys.argv[0] + " gba.out")
+	exit()
 
-# what we'll swap every swi call with
-fake_swi_wrap =   ("\tstmdb	sp!, { r3 }\n"
-		   "\tmov	r3, %s\n"
-		   "\tbl	fake_swi\n"
-		   "\tldmia	sp!, { r3 }\n")
+# This method will return the address of the fake swi
+# calling function for the given value (eg. 0x8000)
+def locate_swi(assembly, val):
+	for line in assembly:
+		# look for the start of the fake swi function in the assembly
+		if line.find("<fake_swi>:") >= 0:
+			# found it, the number is going to be the first
+			# thing in the line
+			return line.split(" ")[0]
 
-for line in contents:
-	if line.lower().strip().startswith("swi"):
-		# get index of swi
-		index = line.lower().find("swi") + 3
-		syscall = line[index:].strip()
-		
-		# append (#) if needed
-		if syscall.startswith("0x"):
-			syscall = "#"+syscall
+# disassemble the binary
+os.system("objdump -d %s > .disassembly.s" % name)
 
-		# insert fake swi wrapper
-		line = fake_swi_wrap % syscall
-	out += line
+# load full binary into memory
+binary = open(name, "r").readlines()
+
+# load the full disassembly into memory
+assembly = open(".disassembly.s", "r").readlines()
+
+# get the address of the fake_swi function
+fake_swi_addr = locate_swi(assembly, 8)
+
+print("address is at %s" % fake_swi_addr)
 
 # write it all to the file we opened
-open("homebrew.s", "w").write(out)
+# open(name, "wb").write(binary)
+

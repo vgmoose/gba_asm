@@ -55,7 +55,20 @@ void * graphics_threadf()
 void m0_draw()
 {
 
-}
+	typedef unsigned char  uint8;
+	typedef unsigned short uint16;
+	typedef unsigned int   uint32;
+	typedef uint16 rgb15;
+	typedef struct obj_attrs {
+		uint16 attr0;
+		uint16 attr1;
+		uint16 attr2;
+		uint16 pad;
+	} __attribute__((packed, aligned(4))) obj_attrs;
+	typedef uint32    tile_4bpp[8];
+	typedef tile_4bpp tile_block[512];
+	
+}       
 
 void m3_draw()
 {
@@ -78,6 +91,12 @@ void vmap(int start, int end)
 {
 	// map virtual memory between specified addresses
 	mmap((void*)start, end-start, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_FIXED, -1, 0);
+}
+
+void intHandler(int dummy)
+{
+	// quit the program
+	exit(0);
 }
 
 int init()
@@ -115,30 +134,22 @@ int init()
 	// create the SDL thread to display the image
 	// TODO: races the asm code
 	pthread_create(&graphics_thread, NULL, graphics_threadf, NULL);
-}
 
-// boolean to keep program running
-static volatile int keepRunning = 1;
-
-void intHandler(int dummy)
-{
-	// set keep running boolean to false when handler fired
-	keepRunning = 0;
+	// attach the interrupt handler to the SIGINT (Ctrl-C)
+	signal(SIGINT, intHandler);
 }
 
 int deinit()
 {
-	// attach the interrupt handler to the SIGINT (Ctrl-C)
-	signal(SIGINT, intHandler);
-
 	// hang forever so that the SDL window stays up
-	while(keepRunning);
+	while(1);
 }
 
 // this method will perform a fake software interrupt depending on
 // the value that is passed into it
 int fake_swi(int arg1, int arg2, int arg3, int swi)
 {
+
 	// Sqrt
 	if (swi == 0x80000)
 		return sqrt(arg1);
@@ -147,5 +158,5 @@ int fake_swi(int arg1, int arg2, int arg3, int swi)
 	if (swi == 0xA0000)
 		return atan2(arg1, arg2);
 
-	return 0;
+	return sqrt(arg1);
 }

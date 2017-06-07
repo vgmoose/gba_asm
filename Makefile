@@ -11,9 +11,9 @@ build:
 
 ifneq (,$(findstring arm, $(ARCH)))
 		$(call cecho, "making ARM binary")
-		# as -g homebrew.s -o homebrew.o -mthumb-interwork
-		gcc -g homebrew/* 1up/* -o 1up.out -lpthread -std=gnu11 -lSDLmain -lSDL -mthumb-interwork -lm
-		$(call cecho, "built 1up.out")
+		gcc -g homebrew/* 1up/* -o gba.out -lpthread -std=gnu11 -lSDLmain -lSDL -mthumb-interwork -lm
+		python swi_convert.py gba.out
+		$(call cecho, "built gba.out")
 	
 else
 		$(call cecho, "cross-compiling GBA rom")
