@@ -17,8 +17,8 @@ ifneq (,$(findstring arm, $(ARCH)))
 	
 else
 		$(call cecho, "cross-compiling GBA rom")
-		arm-none-eabi-gcc -mthumb-interwork -specs=gba.specs homebrew/*.[cs] -o homebrew.o
-		arm-none-eabi-objcopy -O binary *.o homebrew.gba
+		$(DEVKITARM)/bin/arm-none-eabi-gcc -mthumb-interwork -specs=gba.specs homebrew/*.[cs] -o homebrew.o
+		$(DEVKITARM)/bin/arm-none-eabi-objcopy -O binary *.o homebrew.gba
 		$(call cecho, "built homebrew.gba")
 endif
 
