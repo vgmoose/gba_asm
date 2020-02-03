@@ -3,9 +3,6 @@
 .global main
 
 main:
-	// allocate memory for program in C
-	bl	init
-
 	// set GBA display mode to 3 (bitmap)
 	mov	r0, #0x4000000
 	mov	r1, #0x400
@@ -34,8 +31,9 @@ image:
 	// go back to loading pixels if not zero
 	bne	image
 
-	bl	deinit
+hang:
+	bl	hang
 
 .ltorg
 pic:
-	.incbin	"pic.bin"
+	.incbin	"homebrew/pic.bin"

@@ -3,9 +3,6 @@
 .global main
 
 main:
-	// jump to initialization code
-	bl init
-
 	// set gba display mode
  	mov	r0, #0x4000000
  	mov	r1, #0x400
@@ -29,5 +26,5 @@ draw:
 	// continue if countdown not done
 	bne	draw
 
-	// jump to deinitialization code
-	bl	deinit
+hang:
+	bl	hang

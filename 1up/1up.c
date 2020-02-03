@@ -13,6 +13,7 @@
 pthread_t graphics_thread;
 void m0_draw();
 void m3_draw();
+int main();
 
 void * graphics_threadf()
 {
@@ -137,6 +138,9 @@ int init()
 
 	// attach the interrupt handler to the SIGINT (Ctrl-C)
 	signal(SIGINT, intHandler);
+
+	// call out to the original main program (our Makefile starts with this init func)
+	main();
 }
 
 int deinit()

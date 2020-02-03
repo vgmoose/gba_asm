@@ -11,13 +11,13 @@ build:
 
 ifneq (,$(findstring arm, $(ARCH)))
 		$(call cecho, "making ARM binary")
-		gcc -g homebrew/* 1up/* -o gba.out -lpthread -std=gnu11 -lSDLmain -lSDL -mthumb-interwork -lm
+		gcc -g homebrew/*.[cs] 1up/* -o gba.out -lpthread -std=gnu11 -lSDLmain -lSDL -mthumb-interwork -lm -Wl,-einit
 		python swi_convert.py gba.out
 		$(call cecho, "built gba.out")
 	
 else
 		$(call cecho, "cross-compiling GBA rom")
-		arm-none-eabi-gcc -mthumb-interwork -specs=gba.specs homebrew/* 0up/* -o homebrew.o
+		arm-none-eabi-gcc -mthumb-interwork -specs=gba.specs homebrew/*.[cs] -o homebrew.o
 		arm-none-eabi-objcopy -O binary *.o homebrew.gba
 		$(call cecho, "built homebrew.gba")
 endif
