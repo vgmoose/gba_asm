@@ -1,17 +1,20 @@
 #include "draw.h"
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
-uint16_t * screen;
-SDL_Surface *sdl_screen;
+SDL_Renderer* sdl_screen;
+SDL_Texture* texture;
+uint16_t screen[screen_x * screen_y]; // bgr555
 
 void screen_clear()
 {
-	SDL_FillRect(sdl_screen, NULL, 0xFFFF);
+        SDL_RenderClear(sdl_screen);
 }
 
 void screen_flip()
 {
-	SDL_Flip(sdl_screen);
+	SDL_UpdateTexture(texture, NULL, screen, 2 * screen_x);
+	SDL_RenderCopy(sdl_screen, texture, NULL, NULL);
+        SDL_RenderPresent(sdl_screen);
 }
 
 char screen_init(const char * title)
@@ -19,21 +22,30 @@ char screen_init(const char * title)
 	// initialize SDL
 	SDL_Init(SDL_INIT_VIDEO);
 
-	// set the video mode
-	sdl_screen = SDL_SetVideoMode(screen_x, screen_y, 15, SDL_SWSURFACE);
+	SDL_Window* window = SDL_CreateWindow("1up", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_x, screen_y, 0);
 
-	// set the title
-	SDL_WM_SetCaption(title, 0);
+	if (window == NULL)
+	{
+		printf("GUI: %s\n",SDL_GetError());
+		return 0;
+	}
+
+	sdl_screen = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	// ensure properly initialized
 	if (sdl_screen == NULL)
 	{
-		printf("GUI: Could not connect to display!");
+		printf("GUI: Could not connect to display! %s\n", SDL_GetError());
 		return 0;
 	}
 
+	texture = SDL_CreateTexture(sdl_screen,
+                                        SDL_PIXELFORMAT_BGR555,
+                                        SDL_TEXTUREACCESS_STREAMING,
+                                        screen_x, screen_y);
+
 	// setup the screen to draw to later
-	screen = (uint16_t *)sdl_screen->pixels;
+	//screen = (uint16_t *) texture->pixels;
 
 	// clear the whole screen
 	screen_clear();
@@ -53,5 +65,5 @@ void screen_end()
 
 void draw_pixel(int x, int y, uint16_t b)
 {
-	screen[ (y * screen_x + x) ] = ((b << 10) & 0b0111110000000000) | (b & 0b0000001111100000) | (((b >> 10) & 0b0000000000011111));
+	screen[ (y * screen_x + x) ] = b;
 }

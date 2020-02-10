@@ -5,7 +5,7 @@
 #define screen_x 240
 #define screen_y 160
 
-extern uint16_t * screen; // bgr555
+extern uint16_t screen[screen_x * screen_y]; // bgr555
 
 char screen_init(const char * title);
 void screen_end();

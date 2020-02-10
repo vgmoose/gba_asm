@@ -137,8 +137,11 @@ Print( 0, 148, "START=NEW GAME  SELECT=CREDITS", BLACK, GREEN );
 
 while(1)
 {
-   if (BUTTON_START) goto start_game;
-   if (BUTTON_SELECT) goto show_credits;
+   printf("Start: %d\n", BUTTON_START);
+   printf("Down: %d\n", BUTTON_DOWN);
+
+   //if (BUTTON_START) goto start_game;
+   //if (BUTTON_SELECT) goto show_credits;
 }
 
 start_game:
