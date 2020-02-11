@@ -31,6 +31,8 @@ void * graphics_threadf()
 	// depending on the mode, will take an appropriate action
 	while(1)
 	{	
+		process_input();
+
 		// grab the video mode
 		char video_mode = *(char*)(0x4000000);
 
@@ -140,6 +142,7 @@ int init()
 	signal(SIGINT, intHandler);
 
 	// call out to the original main program (our Makefile starts with this init func)
+	sleep(10);
 	main();
 }
 

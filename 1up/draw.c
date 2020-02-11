@@ -1,9 +1,13 @@
 #include "draw.h"
 #include <SDL2/SDL.h>
+#include <math.h>
 
 SDL_Renderer* sdl_screen;
 SDL_Texture* texture;
 uint16_t screen[screen_x * screen_y]; // bgr555
+
+// computer key mappings
+SDL_Keycode key_buttons[] = { SDL_SCANCODE_A, SDL_SCANCODE_B, SDL_SCANCODE_BACKSPACE, SDL_SCANCODE_RETURN, SDL_SCANCODE_RIGHT, SDL_SCANCODE_LEFT, SDL_SCANCODE_UP, SDL_SCANCODE_DOWN, SDL_SCANCODE_R, SDL_SCANCODE_L };
 
 void screen_clear()
 {
@@ -44,9 +48,6 @@ char screen_init(const char * title)
                                         SDL_TEXTUREACCESS_STREAMING,
                                         screen_x, screen_y);
 
-	// setup the screen to draw to later
-	//screen = (uint16_t *) texture->pixels;
-
 	// clear the whole screen
 	screen_clear();
 
@@ -66,4 +67,21 @@ void screen_end()
 void draw_pixel(int x, int y, uint16_t b)
 {
 	screen[ (y * screen_x + x) ] = b;
+}
+
+void process_input()
+{
+	SDL_Event event;
+	if (!SDL_PollEvent(&event))
+		return;
+
+	const Uint8* keys = SDL_GetKeyboardState(NULL);
+	unsigned int cur = 0;
+
+	// go through all button states and flip their bits based on keyboard state
+	for (int x=0; x<10; x++)
+		cur |= (!keys[key_buttons[x]]) * ((unsigned int) pow(2, x));
+
+	*((volatile unsigned int*)(0x04000130)) = cur;
+	
 }
