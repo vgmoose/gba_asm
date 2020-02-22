@@ -1,2 +1,2 @@
-void init();
+void main();
 void deinit();

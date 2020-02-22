@@ -10,10 +10,10 @@ endef
 build:	
 
 ifneq (,$(findstring arm, $(ARCH)))
-		$(call cecho, "making ARM binary")
-		gcc -g homebrew/*.[cs] 1up/* -o gba.out -lpthread -std=gnu11 -lSDL2main -lSDL2 -mthumb-interwork -lm -Wl,-einit
-		python swi_convert.py gba.out
-		$(call cecho, "built gba.out")
+		$(call cecho, "making ARM binaries")
+		gcc -g 1up/* -o 1up_driver -std=gnu11 -lSDL2main -lSDL2 -mthumb-interwork -lm -ldl -lrt
+		gcc -g homebrew/*.[cs] 1up/shared.c -o gba.out -mthumb-interwork -ldl -lrt -Wl,-einit_wrapper
+		$(call cecho, "built 1up_driver and gba.out")
 	
 else
 		$(call cecho, "cross-compiling GBA rom")

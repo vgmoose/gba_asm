@@ -1,19 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
-#include <fcntl.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <signal.h>
 #include "draw.h"
+#include "shared.h"
 
-
-pthread_t graphics_thread;
 void m0_draw();
 void m3_draw();
-int main();
+
+int spawn_child_gba_process()
+{
+  pid_t parent = getpid();
+  pid_t pid = fork();
+
+  // fork failed
+  if (pid == -1)
+    printf("Failed to fork child process.\n");
+
+  // we're the parent, return child pid
+  if (pid != 0)
+    return pid;
+
+  // down here, we're successfully the child process
+  // now it's time to start running the child program
+  execv("gba.out", NULL);
+
+  printf("Could not execute gba.out\n");
+  exit(-2);
+}
 
 void * graphics_threadf()
 {
@@ -90,60 +107,29 @@ void m3_draw()
         screen_flip();
 }
 
-void vmap(int start, int end)
-{
-	// map virtual memory between specified addresses
-	mmap((void*)start, end-start, PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_SHARED | MAP_FIXED, -1, 0);
-}
-
 void intHandler(int dummy)
 {
 	// quit the program
 	exit(0);
 }
 
-int init()
+int main()
 {
-	// info is from:
-	// https://www.reinterpretcast.com/writing-a-game-boy-advance-game
-
-	// 16 KB System ROM (executable, but not readable)
-	vmap(0x00000000, 0x00003FFF);
-
-	// 256 KB EWRAM (general purpose RAM external to the CPU)
-	vmap(0x02000000, 0x02030000);
-
-	// 32 KB IWRAM (general purpose RAM internal to the CPU)
-	vmap(0x03000000, 0x03007FFF);
-
-	// I/O Registers	
-	vmap(0x04000000, 0x040003FF);
-
-	// 1 KB Colour Palette RAM
-	vmap(0x05000000, 0x050003FF);
-
-	// 96 KB VRAM (Video RAM)
-	vmap(0x06000000, 0x06017FFF);
-
-	// 1 KB OAM RAM (Object Attribute Memory)
-	vmap(0x07000000, 0x070003FF);
-
-	// Game Pak ROM (0 to 32 MB)
-	vmap(0x08000000, 0x09E84800);
-
-	// Game Pak RAM
-	vmap(0x0E000000, 0x0F000000);
-
-	// create the SDL thread to display the image
-	// TODO: races the asm code
-	pthread_create(&graphics_thread, NULL, graphics_threadf, NULL);
+  // initialize shared memory where the GBA expects it
+  init_shared_mem(O_CREAT | O_RDWR);
 
 	// attach the interrupt handler to the SIGINT (Ctrl-C)
 	signal(SIGINT, intHandler);
 
-	// call out to the original main program (our Makefile starts with this init func)
-	sleep(10);
-	main();
+  // we're the parent process, and we'll make a child one
+  // to execute a "gba-like" binary (arm, has graphics code, syscalls)
+	spawn_child_gba_process();
+
+  // run our graphics intepreter, that looks at the shared VRAM and
+  // displays an image in SDL (only supports mode 3)
+  // TODO: replace with an emulator's renderer
+  // TODO: races the asm code (might be unfixable)
+	graphics_threadf();
 }
 
 int deinit()
